@@ -1,0 +1,6 @@
+#!/bin/bash
+
+kill -9 $(pidof xfce4-panel)
+xfce4-panel 2>/dev/null & 
+disown
+echo done

@@ -1,0 +1,79 @@
+#!/bin/zsh
+
+if [ $(whoami) != "root" ]
+then
+	echo "run as root"
+	return 1
+else
+	if [ $# -ne 1 ]
+	then
+		echo "specify interface as argv1"
+		return 1
+	else
+		interface=$1
+		echo "selected interface is $interface"
+	fi
+	echo "starting..."
+	oldmac=$(ip a | grep $interface: -A2 | grep "ether" | cut -d " " -f6)
+	oldip=$(ip a | grep $interface: -A2 | grep "inet" | cut -d " " -f6)
+	echo "\ncurrent MAC=$oldmac\ncurrent IP=$oldip\n"
+fi
+echo "stopping device $interface"
+ip link set dev $interface down
+if [ $? -ne 0 ]
+then
+	echo "failed to stop device"
+	return 1
+else
+	echo "$interface down"
+fi
+newmac=$(randmac)
+echo "setting newly generated MAC address:" $newmac
+ip link set dev $interface address $newmac
+if [ $? -ne 0 ]
+then
+	echo "failed to set MAC address! run the script again..."
+	return 1
+else
+	echo "new MAC set to $newmac"
+fi
+echo "starting device $interface"
+ip link set dev $interface up
+if [ $? -ne 0 ]
+then
+	echo "failed to start device"
+	return 1
+else
+	echo "$interface up"
+fi
+
+echo "verifying"
+verif=0
+while [ 1 ]
+mac=$(ip a | grep $interface: -A2 | grep "ether" | cut -d " " -f6)
+ip=$(ip a | grep $interface: -A2 | grep "inet" | cut -d " " -f6)
+do
+if [ $mac != $oldmac ]
+then
+	echo "mac changed successfully from $oldmac to $mac"
+	verif=1
+	sleep 1
+else
+	echo "waiting for MAC..."
+	sleep 4
+fi
+if [ $ip != $oldip ]
+then
+	echo "ip changed successfully from $oldip to $ip"
+	verif=2
+	sleep 1
+else
+	echo "waiting for IP..."
+	sleep 4
+fi
+if [ $verif -eq 2 ]
+then
+	echo "\nnew MAC=$mac\nnew IP=$ip\n"
+	return 0
+fi
+done

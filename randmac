@@ -1,0 +1,9 @@
+#!/usr/bin/python
+
+import random
+
+if __name__=="__main__":
+	newmac = ""
+	for i in range(0,6):
+		newmac = newmac + hex(random.randint(64,255))[2::] + ":"
+	print(newmac[:-1])

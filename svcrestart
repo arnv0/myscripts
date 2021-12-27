@@ -1,0 +1,11 @@
+#!/bin/zsh
+if [ $# -ne 1 ]
+then
+	echo bad service name!
+else
+	echo $1
+	whoami
+	systemctl stop $1
+	systemctl start $1
+	systemctl status $1
+fi
