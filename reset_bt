@@ -1,0 +1,4 @@
+#!/bin/zsh
+rm -rf /var/lib/bluetooth
+systemctl restart bluetooth.service
+echo READY!
