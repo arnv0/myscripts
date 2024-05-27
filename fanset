@@ -1,0 +1,22 @@
+#!/bin/zsh
+
+if [[ `whoami` != 'root' ]];
+then
+	echo run script as root!
+	exit 1
+fi
+
+if [[ $1 == 'auto' ]];
+then
+	nbfc set -f 0 -a
+	nbfc set -f 1 -a
+elif [[ $1 == 'max' ]];
+then
+	nbfc set -f 0 -s 96
+	nbfc set -f 1 -s 96
+else
+	echo "useage: $0 max|auto"
+fi
+
+watch -n1 nbfc status -a
+exit 0
